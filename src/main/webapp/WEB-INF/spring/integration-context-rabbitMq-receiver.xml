@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:int="http://www.springframework.org/schema/integration"
+	   xmlns:int-http="http://www.springframework.org/schema/integration/http"
+	   xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+      	http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.2.xsd
+      	http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp-2.2.xsd
+        http://www.springframework.org/schema/integration/http http://www.springframework.org/schema/integration/http/spring-integration-http-2.2.xsd">
+
+
+	<int-amqp:inbound-channel-adapter id="genericTaskChannel"
+									  channel="sample.consumeRequest"
+									  queue-names="rabbitmq.service.sample.queue" connection-factory="rabbitConnectionFactory"
+									  message-converter="json-converter" concurrent-consumers="10"/>
+
+	<int:service-activator ref="MqMessageController" method="receiveRabbitMqMessage" input-channel="sample.consumeRequest"/>
+
+	<int:channel id="sample.consumeRequest">
+		<int:interceptors>
+			<int:wire-tap channel="logger"/>
+		</int:interceptors>
+	</int:channel>
+
+	<int:logging-channel-adapter id="logger" log-full-message="true" level="DEBUG"/>
+
+</beans>

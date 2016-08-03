@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit-1.1.xsd">
+
+    <!-- connection details to rabbit use the properties file to configure -->
+    <rabbit:connection-factory id="rabbitConnectionFactory" addresses="${rm.addresses}"
+                               virtual-host="${rm.vhost}" username="${rm.username}" password="${rm.password}"/>
+
+    <bean id="errorHandler" class="com.jeremy.sample.exception.LoggingErrorHandler"/>
+
+    <!-- end of changes -->
+
+    <rabbit:queue name="rabbitmq.service.sample.queue" />
+
+    <!-- example pattern task.save.clm.manual, task.update.itsm.computecontainer -->
+    <rabbit:topic-exchange name="psl.activity-task.topic">
+        <rabbit:bindings>
+            <rabbit:binding queue="rabbitmq.service.sample.queue" pattern="RabbitmqService.#"/>
+        </rabbit:bindings>
+    </rabbit:topic-exchange>
+
+
+    <rabbit:admin connection-factory="rabbitConnectionFactory"/>
+
+    <bean id="amqpActivityTaskTemplate" class="org.springframework.amqp.rabbit.core.RabbitTemplate">
+        <property name="exchange" value="psl.activity-task.topic"/>
+        <property name="connectionFactory" ref="rabbitConnectionFactory"/>
+        <property name="messageConverter" ref="json-converter"/>
+    </bean>
+
+    <bean id="json-converter" class="org.springframework.amqp.support.converter.JsonMessageConverter"/>
+
+</beans>

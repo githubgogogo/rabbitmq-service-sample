@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-http="http://www.springframework.org/schema/integration/http"
+	xmlns:stream="http://www.springframework.org/schema/integration/stream"
+	xsi:schemaLocation="
+      	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+      	http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.2.xsd
+		http://www.springframework.org/schema/integration/http http://www.springframework.org/schema/integration/http/spring-integration-http-2.2.xsd
+		http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream-2.2.xsd">
+
+	<int:annotation-config />
+
+	<!-- Message receipt over RMQ -->
+	<import resource="application-context-common-integration.xml"/>
+	<import resource="integration-context-rabbitMq-sender.xml" />
+	<import resource="integration-context-rabbitMq-receiver.xml" />
+	
+	<bean
+		class="org.springframework.integration.http.inbound.UriPathHandlerMapping " />
+
+    <bean id="messageTemplate" class="org.springframework.integration.core.MessagingTemplate" />
+    
+	<!--&lt;!&ndash; Task creation &ndash;&gt;-->
+	<!--<int:channel id="taskCreationChannel" />-->
+
+	<!--<int:chain input-channel="taskCreationChannel"-->
+		<!--output-channel="taskCreationJsonChannel">-->
+		<!--<int:enricher>-->
+			<!--<int:property name="operation"-->
+				<!--expression="T(com.telstra.ncs.network.integration.UseCase).safeValueOf(payload.operationName).description" />-->
+			<!--<int:property name="operationClass"-->
+				<!--expression="T(com.telstra.ncs.network.integration.UseCase).safeValueOf(payload.operationName).useCaseClass.className" />-->
+		<!--</int:enricher>-->
+		<!--<int:object-to-json-transformer />-->
+	<!--</int:chain>-->
+
+	<!--<int:channel id="taskCreationJsonChannel" />-->
+
+	<!--<int-http:outbound-channel-adapter-->
+		<!--channel="taskCreationJsonChannel" url="${activity.service.rest.url}/activity"-->
+		<!--http-method="POST">-->
+	<!--</int-http:outbound-channel-adapter>-->
+
+
+	<!--&lt;!&ndash; get next activityId &ndash;&gt;-->
+	<!--<int:channel id="getActivityIdChannel" />-->
+
+	<!--<int-http:outbound-gateway url="${activity.service.rest.url}/id"-->
+		<!--request-channel="getActivityIdChannel" expected-response-type="java.lang.Long"-->
+		<!--reply-timeout="5" http-method="GET">-->
+	<!--</int-http:outbound-gateway>-->
+</beans>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/tx  http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+
+    <!--<bean id="dataSource"-->
+          <!--class="org.springframework.jdbc.datasource.DriverManagerDataSource">-->
+        <!--<property name="driverClassName" value="${jdbc.driverClassName}" />-->
+        <!--<property name="url" value="${jdbc.url}" />-->
+        <!--<property name="username" value="${jdbc.username}" />-->
+        <!--<property name="password" value="${jdbc.password}" />-->
+    <!--</bean>-->
+
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+          destroy-method="close">
+        <property name="driverClass" value="${jdbc.driverClassName}" />
+        <property name="jdbcUrl" value="${jdbc.url}" />
+        <property name="user" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="minPoolSize" value="${hibernate.c3p0.minPoolSize}" />
+        <property name="maxPoolSize" value="${hibernate.c3p0.maxPoolSize}" />
+        <property name="maxStatements" value="${hibernate.c3p0.maxStatements}" />
+        <property name="acquireIncrement" value="${hibernate.c3p0.acquireIncrement}"/>
+        <property name="preferredTestQuery" value="${hibernate.c3p0.preferredTestQuery}" />
+        <property name="maxConnectionAge" value="${hibernate.c3p0.maxConnectionAge}" />
+        <property name="maxIdleTime" value="${hibernate.c3p0.maxIdleTime}" />
+        <property name="testConnectionOnCheckin" value="${hibernate.c3p0.testConnectionOnCheckin}" />
+    </bean>
+
+
+    <!-- Hibernate session factory -->
+    <bean id="sessionFactory"
+          class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan">
+            <list>
+                <value>com.jeremy.sample.domain.entity</value>
+            </list>
+        </property>
+
+        <property name="hibernateProperties" ref="serviceHibernateProperties"/>
+
+    </bean>
+
+    <util:properties id="serviceHibernateProperties">
+        <prop key="hibernate.dialect">${hibernate.dialect}</prop>
+        <prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+        <prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+        <prop key="hibernate.default_schema">${service.dao.schema}</prop>
+        <prop key="hibernate.cache.use_second_level_cache">false</prop>
+        <prop key="hibernate.connection.autocommit">true</prop>
+
+    </util:properties>
+
+    <bean id="auditInterceptor" class="com.jeremy.sample.dao.AuditInterceptor" />
+
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="entityInterceptor" ref="auditInterceptor" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+
+
+</beans>
