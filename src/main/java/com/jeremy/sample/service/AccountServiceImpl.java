@@ -29,6 +29,7 @@ public class AccountServiceImpl implements AccountService
 
     public List<Account> getAll()
     {
+        LOGGER.debug("getAll start.");
         List<Account> accounts = new ArrayList<Account>();
         List<AccountEntity> accountEntities = accountDao.getAllAccounts();
         for (AccountEntity accountEntity : accountEntities)
